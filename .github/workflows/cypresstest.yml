@@ -1,0 +1,73 @@
+on:
+  push:
+    branches: [main, master]
+  pull_request:
+    branches: [main, master]
+  workflow_dispatch:
+    inputs:
+      spec:
+        description: 'Spec file(s) to run (optional, runs all if empty)'
+        required: false
+        default: ''
+        type: string
+      browser:
+        description: 'Browser to run tests against'
+        required: false
+        default: 'chrome'
+        type: string
+
+jobs:
+    cypress-run:
+        name: Run Cypress tests on ${{ matrix.browser }}
+        runs-on: ubuntu-latest
+        strategy:
+            fail-fast: false
+            matrix:
+                browser: [chrome, firefox, edge]
+        steps:
+          - name: Checkout code
+            uses: actions/checkout@v4
+
+          - name: Setup Node.js
+            uses: actions/setup-node@v4
+            with:
+                node-version: '22'
+                cache: npm
+                cache-dependency-path: ./cypress-tests/package-lock.json
+          
+          - name: Install dependencies
+            run: npm ci
+            working-directory: ./cypress-tests
+
+          - name: Verify Cypress binary
+            run: npx cypress verify
+            working-directory: ./cypress-tests
+        
+          - name: Run Cypress tests
+            uses: cypress-io/github-action@v6
+            with:
+                working-directory: ./cypress-tests
+                browser: ${{ matrix.browser }}
+                spec: ${{ github.event.inputs.spec }}
+                record: true
+                group: 'E2E on ${{ matrix.browser }}'
+                tag: ${{ github.event_name }}
+                parallel: false
+            env:
+                CYPRESS_RECORD_KEY: ${{ secrets.CYPRESS_RECORD_KEY }}
+                GITHUB_TOKEN:       ${{ secrets.GITHUB_TOKEN }}
+
+          - name: Upload screenshots on failure
+            if: failure()
+            uses: actions/upload-artifact@v4
+            with:
+                name: screenshots-${{ matrix.browser }}
+                path: cypress-tests/cypress/screenshots
+
+          - name: Upload videos on failure
+            if: failure()
+            uses: actions/upload-artifact@v4
+            with:
+                name: videos-${{ matrix.browser }}
+                path: cypress-tests/cypress/videos
+                
