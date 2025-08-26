@@ -1,0 +1,8 @@
+{
+    "validUserName": "test1@email.cz",
+    "validPassword": "heslo123",
+    "blockedUserName": "blocked@email.cz ",
+    "blockedPassword": "pablocked123ss",
+    "invalidUserName": "invalid@email.com",
+    "invalidPassword": "blablabla"
+}

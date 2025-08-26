@@ -1,0 +1,6 @@
+{
+    "breed": "Voříšek",
+    "invalidEmail": "invalidemail.cz",
+    "invalidMessage": "Short",
+    "validMessage": "Toto je zprava delsi nez deset znaku."
+}
