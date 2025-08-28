@@ -1,7 +1,13 @@
 import menuComponent, { MenuItem } from "../components/menuComponent";
 import shopPage from "../pages/shopPage";
 import ProductComponent from "../components/productComponent";
+import CartProductComponent from "../components/cartProductComponent";
 
+interface DogProduct {
+    id: string
+    name: string
+    price: string
+}
 
 describe('Shop tests', () => {
 
@@ -13,47 +19,52 @@ describe('Shop tests', () => {
 
     it('should validate all html elemets on shop page', () => {
 
-        //kazdy z jednotlivych ctverecku gridu 
-        // ma jednotlive parametry jako nazev, obrazek, popis
-        cy.fixture('dogProducts.json').then((dogProducts: string[]) => {
+        //Assert
+        shopPage.shopTitle().should('be.visible').and('contain', 'Nabídka štěňátek')
+        shopPage.productGrid().should('be.visible')
+
+        //kazdy z jednotlivych prvku gridu ma vsechny udaje jako nazev, obrazek, cenu a tlacitka detail a pridat
+        cy.fixture<DogProduct[]>('dogProducts.json').then((dogProducts) => {
             dogProducts.forEach((product) => {
-                cy.verifyProductStructure(product)
+                const productId = product.id
+                cy.verifyProductStructure(productId)
             })
         })
-
-
     });
+
 
     it('should add item to cart with add to cart button', () => {
 
-        //const productName = 'golden-1'
-
-        cy.fixture('dogProducts.json').then((dogProducts: string[]) => {
-            const productName = dogProducts[0]
-            const productDog = new ProductComponent(productName)
+        //Act
+        cy.fixture('dogProducts.json').then((dogProducts) => {
+            const product = dogProducts[0]
+            const productDog = new ProductComponent(product.id)
             productDog.addToCart()
 
-        })
+            //Assert
+            shopPage.addedProductMessage().should('be.visible').and('contain', product.name + ' přidán/a do košíku')
+            shopPage.cartCount().should('have.text', '1')
 
-        //Assert
-        shopPage.addedProductMessage().should('be.visible')
-        shopPage.cartCount().should('have.text', '1')
+            //Assert na spravny produkt v kosiku
+            menuComponent.navigate(MenuItem.CART)
+            const cartProduct = new CartProductComponent(product.id)
+            cartProduct.cartProductName().should('contain.text', product.name)
+            cartProduct.cartProductPrice().should('contain.text', product.price + " Kč")
+
+        })
 
     });
 
     it('should open detail with open detail button', () => {
 
-        cy.fixture('dogProducts.json').then((dogProducts: string[]) => {
+        //Act
+        cy.fixture('dogProducts.json').then((dogProducts) => {
             const productName = dogProducts[1]
-            const productDog = new ProductComponent(productName)
+            const productDog = new ProductComponent(productName.id)
             productDog.clickOnDetail()
 
-
-            //Assert - ze naviguje na stranku tohoto daneho produktu
-            //https://puppy-shop-automation-test.lovable.app/shop/collie-1
-
-            cy.url().should('eq', `https://puppy-shop-automation-test.lovable.app/shop/${productName}`)
-
+            //Assert
+            cy.url().should('eq', `https://puppy-shop-automation-test.lovable.app/shop/${productName.id}`)
 
         })
 

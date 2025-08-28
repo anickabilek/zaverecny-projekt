@@ -1,6 +1,7 @@
 export default new class LoginPage {
 
     wrapper = () => cy.get('[data-testid="main"]')
+    loginPageTitle = () => this.wrapper().find('[data-testid="login-title"]')
     loginEmailInput = () => this.wrapper().find('[data-testid="login-email"]')
     loginPasswordInput = () => this.wrapper().find('[data-testid="login-password"]')
     loginButton = () => this.wrapper().find('[data-testid="login-submit"]')
@@ -8,13 +9,14 @@ export default new class LoginPage {
     loggedEmailOnTop = () => cy.get('[data-testid="user-email"]')
     logoutButton = () => this.wrapper().find('[data-testid="logout-now"]')
     logoutOnTopButton = () => cy.get('[data-testid="logout-button"]')
-    //loginMessage muze byt bud "Přihlášení úspěšné." nebo "Účet je zablokován."
+    //loginMessage muze byt bud "Přihlášení úspěšné." nebo "Neplatné přihlašovací údaje." nebo "Účet je zablokován."
     loginMessage = () => cy.get('[data-testid="login-message"]')
+    loginEmailError = () => this.wrapper().find('[data-testid="email-error"]')
 
 
-    login(loginEmail: string, password: string) {
-        this.loginEmailInput().clear().type(loginEmail)
-        this.loginPasswordInput().clear().type(password)
-        this.loginButton().click()
-    }
+    // login(loginEmail: string, password: string) {
+    //     this.loginEmailInput().clear().type(loginEmail)
+    //     this.loginPasswordInput().clear().type(password)
+    //     this.loginButton().click()
+    // }
 }

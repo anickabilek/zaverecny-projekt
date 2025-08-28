@@ -35,7 +35,7 @@
 //     }
 //   }
 // }
-
+import loginPage from "../pages/loginPage";
 import ProductComponent from "../components/productComponent";
 
 export { }
@@ -43,10 +43,19 @@ declare global {
     namespace Cypress {
         interface Chainable {
             verifyProductStructure(productId: string): Chainable<void>
+            login(email: string, password: string): Chainable<void>
 
         }
     }
 }
+
+//login
+Cypress.Commands.add('login', (loginEmail: string, password: string) => {
+    loginPage.loginEmailInput().clear().type(loginEmail)
+    loginPage.loginPasswordInput().clear().type(password)
+    loginPage.loginButton().click()
+})
+
 
 //custom command na assert jednotlivych polozek produktu v gridu produktu
 Cypress.Commands.add('verifyProductStructure', (productId: string) => {

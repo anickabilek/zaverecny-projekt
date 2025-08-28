@@ -6,10 +6,12 @@ export default new class RequestPage {
 
     nameInput = () => this.formWrapper().find('[data-testid="input-name"]')
     emailInput = () => this.formWrapper().find('[data-testid="input-email"]')
+    emailInputErrorMessage = () => this.formWrapper().find('[data-testid="email-error"]')
     phoneNumberInput = () => this.formWrapper().find('[data-testid="input-phone"]')
     breedInput = () => this.formWrapper().find('[data-testid="input-breed"]')
     budgetInput = () => this.formWrapper().find('[data-testid="input-budget"]')
     messageInput = () => this.formWrapper().find('[data-testid="textarea-message"]')
+    messageInputErrorMessage = () => this.formWrapper().find('[data-testid="message-error"]')
 
     dogSizeInput = () => this.formWrapper().find('[data-testid="select-size"]')
     dogSizeSmall = () => cy.contains('span', 'Malé')
@@ -35,6 +37,7 @@ export default new class RequestPage {
     dogTempramentHypoallergenic = () => this.formWrapper().find('[data-testid="checkbox-hypoallergenic"]')
 
     chooseImageButton = () => this.formWrapper().find('[data-testid="request-photo"]')
+    imageLoaded = () => this.formWrapper().find('[data-testid="request-photo-preview"]')
 
 
     submitButton = () => this.formWrapper().find('[data-testid="request-submit"]')
@@ -132,19 +135,21 @@ export default new class RequestPage {
             this.calendarDay().contains(data.date).click()
         }
 
-        switch (data.gender) {
-            case GenderItem.Fenka:
-                this.dogGenderFemale().click()
-                break
-            case GenderItem.Pes:
-                this.dogGenderMale().click()
-                break
-            case GenderItem.Nezalezi:
-                this.dogGenderNoPreference().click()
-                break
-            default:
-                throw new Error(`Unknown gender ${data.gender}`);
+        if (data.gender) {
+            switch (data.gender) {
+                case GenderItem.Fenka:
+                    this.dogGenderFemale().click()
+                    break
+                case GenderItem.Pes:
+                    this.dogGenderMale().click()
+                    break
+                case GenderItem.Nezalezi:
+                    this.dogGenderNoPreference().click()
+                    break
+                default:
+                    throw new Error(`Unknown gender ${data.gender}`);
 
+            }
         }
 
         if (data.temperament) {
@@ -167,9 +172,30 @@ export default new class RequestPage {
             })
         }
 
-        this.chooseImageButton().selectFile('cypress/fixtures/' + data.imagePath)
+        if (data.imagePath) {
+            this.chooseImageButton().selectFile('cypress/fixtures/' + data.imagePath)
+        }
 
 
+    }
+
+    assertClearForm() {
+        this.nameInput().should('contain', '')
+        this.emailInput().should('contain', '')
+        this.phoneNumberInput().should('contain', '')
+        this.breedInput().should('contain', '')
+        this.dogSizeInput().should('contain', 'Vyberte velikost')
+        this.dogExperience().should('contain', 'Vyberte úroveň')
+        this.calendar().should('contain', 'Vyberte datum')
+        this.dogGenderNoPreference().should('have.attr', 'aria-checked', 'true')
+        this.dogTemperamentActive().should('not.be.checked')
+        this.dogTemperamentCalm().should('not.be.checked')
+        this.dogTemperamentFriendly().should('not.be.checked')
+        this.dogTempramentHypoallergenic().should('not.be.checked')
+        this.budgetInput().should('contain', '')
+        this.imageLoaded().should('not.exist')
+        this.messageInput().should('contain', '')
+        this.submitButton().should('not.be.enabled')
     }
 
 }

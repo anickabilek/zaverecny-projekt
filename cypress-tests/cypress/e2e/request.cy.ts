@@ -11,7 +11,46 @@ beforeEach(() => {
 
 describe('Request page tests', () => {
 
-    it.only('should fill all fields correctly and send request', () => {
+    it('should fill all fields correctly and send request', () => {
+
+        //Arrange
+        cy.fixture('formData.json').then((formData) => {
+            const data: FormData = {
+                name: faker.internet.displayName(),
+                email: faker.internet.email(),
+                phoneNumber: faker.number.int({ min: 10000000, max: 99999999 }).toString(),
+                breed: formData.breed,
+                budget: formData.budget,
+                message: formData.validMessage,
+                gender: GenderItem.Fenka,
+                temperament: [TemperamentItem.Klidny, TemperamentItem.Pratelsky],
+                imagePath: "UglyDog.jpg",
+                dogSize: DogSize.Male,
+                experience: Experience.Expert,
+                //vybere den podle zadaneho cisla a pristi mesic
+                date: faker.number.int({ min: 1, max: 28 }).toString(),
+            }
+
+            //Act
+            requestPage.fillForm(data)
+
+        })
+
+        //cy.wait(5000)
+
+        requestPage.submitRequest()
+
+        //Assert
+        requestPage.submitSuccessMessage().should('be.visible')
+            .and('have.text', '✅ Poptávka byla úspěšně odeslána! Děkujeme za váš zájem. Brzy se vám ozveme s personalizovanou nabídkou na míru.')
+
+        //ze jsou data ve formulari vycistena
+        requestPage.assertClearForm()
+
+
+    });
+
+    it('should clear all input fields when Reset button is clicked', () => {
 
         //Arrange
         cy.fixture('formData.json').then((formData) => {
@@ -25,9 +64,9 @@ describe('Request page tests', () => {
                 gender: GenderItem.Pes,
                 temperament: [TemperamentItem.Aktivni, TemperamentItem.Hypoalergenni],
                 imagePath: "UglyDog.jpg",
-                dogSize: DogSize.Male,
-                experience: Experience.Expert,
-                //vybere zadany den a pristi mesic
+                dogSize: DogSize.Velke,
+                experience: Experience.Zacatecnik,
+                //vybere den podle zadaneho cisla a pristi mesic
                 date: faker.number.int({ min: 1, max: 28 }).toString(),
             }
 
@@ -35,27 +74,61 @@ describe('Request page tests', () => {
             requestPage.fillForm(data)
 
         })
-        cy.wait(5000)
-        requestPage.submitRequest()
+
+        requestPage.resetButton().click()
 
         //Assert
-        requestPage.submitSuccessMessage().should('be.visible')
-            .and('have.text', '✅ Poptávka byla úspěšně odeslána! Děkujeme za váš zájem. Brzy se vám ozveme s personalizovanou nabídkou na míru.')
-
-        //ze jsou data ve formulari vycistena
+        requestPage.assertClearForm()
 
 
     });
 
-    it('should clear all input fields when Reset button is clicked', () => {
+    it('should show error when message is too short', () => {
+        //Arrange
+        cy.fixture('formData.json').then((formData) => {
+            const data: FormData = {
+                name: faker.internet.displayName(),
+                email: faker.internet.email(),
+                message: formData.invalidMessage,
+                dogSize: DogSize.Stredni,
+                experience: Experience.Pokrocily,
+                //vybere den podle zadaneho cisla a pristi mesic
+                date: faker.number.int({ min: 1, max: 28 }).toString(),
+            }
+
+            //Act
+            requestPage.fillForm(data)
+
+        })
+
+        //Assert
+        requestPage.messageInputErrorMessage().should('be.visible').and('contain', 'Popište své požadavky (min. 10 znaků)')
+
+
 
     });
 
     it('should show error when email is invalid', () => {
 
-    });
+        //Arrange
+        cy.fixture('formData.json').then((formData) => {
+            const data: FormData = {
+                name: faker.internet.displayName(),
+                email: formData.invalidEmail,
+                message: formData.validMessage,
+                dogSize: DogSize.Velke,
+                experience: Experience.Zacatecnik,
+                //vybere den podle zadaneho cisla a pristi mesic
+                date: faker.number.int({ min: 1, max: 28 }).toString(),
+            }
 
-    it('should show error when message is too short', () => {
+            //Act
+            requestPage.fillForm(data)
+
+        })
+
+        //Assert
+        requestPage.emailInputErrorMessage().should('be.visible').and('contain', 'Zadejte platný e‑mail')
 
     });
 

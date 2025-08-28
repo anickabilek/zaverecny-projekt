@@ -10,13 +10,15 @@ describe('Home Page tests', () => {
     menuComponent.navigate(MenuItem.HOME)
   })
 
+
   it('should validate all html element on home page are visible', () => {
 
-    //Act
-    homePage.logo().should('be.visible')
-
     //Assert
-
+    homePage.logo().should('be.visible')
+    homePage.title().should('be.visible').and('contain', 'Eshop štěňátek')
+    homePage.subtitle().should('be.visible')
+    homePage.shopButton().should('be.visible').and('have.attr', 'href')
+    homePage.requestButton().should('be.visible').and('have.attr', 'href')
 
   })
 
@@ -26,6 +28,8 @@ describe('Home Page tests', () => {
     homePage.requestButton().click()
 
     //Assert
+    cy.url().should('include', '/request')
+
 
 
   })
@@ -36,7 +40,8 @@ describe('Home Page tests', () => {
     homePage.shopButton().click()
 
     //Assert
-  });;
+    cy.url().should('include', '/shop')
+  })
 
 
 
